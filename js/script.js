@@ -1,12 +1,79 @@
-document.getElementById("displayInput").addEventListener("keydown", function (event) {
-  if (event.key == "Enter") {
-    // Get the text that the user typed in the input element.
-    let text = this.textContent;
+const locationName = document.getElementById("locationName");
+const display = document.getElementById("display");
+const input = document.getElementById("displayInput");
 
-    // Append the text to the output element.
-    document.getElementById("display").innerHTML += text + "<br>";
-
-    // Clear the input element.
-    this.textContent = "";
+addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    display.innerHTML += "<br>> " + input.value;
+    input.value = "";
   }
 });
+function changeName() {
+  const locations = [
+    "Alfa",
+    "Bravo",
+    "Charlie",
+    "Delta",
+    "Echo",
+    "Foxtrot",
+    "Golf",
+    "Hotel",
+    "India",
+    "Juliett",
+    "Kilo",
+    "Lima",
+    "Mike",
+    "November",
+    "Oscar",
+    "Papa",
+    "Quebec",
+    "Romeo",
+    "Sierra",
+    "Tango",
+    "Uniform",
+    "Victor",
+    "Whiskey",
+    "X-ray",
+    "Yankee",
+    "Zulu",
+  ];
+  const locationNumber = Math.floor(Math.random() * locations.length);
+  return locations[locationNumber];
+}
+// Changes the name of the server
+setInterval(() => {
+  locationName.textContent = changeName();
+}, 1000);
+// Adds text to the display
+setInterval(() => {
+  const locations = [
+    "Alfa",
+    "Bravo",
+    "Charlie",
+    "Delta",
+    "Echo",
+    "Foxtrot",
+    "Golf",
+    "Hotel",
+    "India",
+    "Juliett",
+    "Kilo",
+    "Lima",
+    "Mike",
+    "November",
+    "Oscar",
+    "Papa",
+    "Quebec",
+    "Romeo",
+    "Sierra",
+    "Tango",
+    "Uniform",
+    "Victor",
+    "Whiskey",
+    "X-ray",
+    "Yankee",
+    "Zulu",
+  ];
+  const locationNumber = Math.floor(Math.random() * locations.length);
+  display.innerHTML += "<br>> " + locations[locationNumber];
+}, 2000);
