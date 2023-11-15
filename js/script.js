@@ -43,7 +43,7 @@ addEventListener("keypress", (e) => {
     if (input.value == "") {
       input.value = "";
     } else {
-      display.innerHTML += "<br>< " + input.value;
+      typeWriterPlayer(input.value, 0);
       input.value = "";
     }
   }
