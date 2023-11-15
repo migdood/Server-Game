@@ -1,79 +1,64 @@
+import {
+  typeWriter,
+  typeWriterPlayer,
+  typeWriterLocation,
+} from "./functions.js";
+
 const locationName = document.getElementById("locationName");
 const display = document.getElementById("display");
 const input = document.getElementById("displayInput");
-
+const locations = [
+  "Alfa",
+  "Bravo",
+  "Charlie",
+  "Delta",
+  "Echo",
+  "Foxtrot",
+  "Golf",
+  "Hotel",
+  "India",
+  "Juliett",
+  "Kilo",
+  "Lima",
+  "Mike",
+  "November",
+  "Oscar",
+  "Papa",
+  "Quebec",
+  "Romeo",
+  "Sierra",
+  "Tango",
+  "Uniform",
+  "Victor",
+  "Whiskey",
+  "X-ray",
+  "Yankee",
+  "Zulu",
+];
+// let serverHealth = {
+//   health: 100,
+// };
 addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
-    display.innerHTML += "<br>> " + input.value;
-    input.value = "";
+    if (input.value == "") {
+      input.value = "";
+    } else {
+      display.innerHTML += "<br>< " + input.value;
+      input.value = "";
+    }
   }
 });
 function changeName() {
-  const locations = [
-    "Alfa",
-    "Bravo",
-    "Charlie",
-    "Delta",
-    "Echo",
-    "Foxtrot",
-    "Golf",
-    "Hotel",
-    "India",
-    "Juliett",
-    "Kilo",
-    "Lima",
-    "Mike",
-    "November",
-    "Oscar",
-    "Papa",
-    "Quebec",
-    "Romeo",
-    "Sierra",
-    "Tango",
-    "Uniform",
-    "Victor",
-    "Whiskey",
-    "X-ray",
-    "Yankee",
-    "Zulu",
-  ];
-  const locationNumber = Math.floor(Math.random() * locations.length);
-  return locations[locationNumber];
+  return locations[Math.floor(Math.random() * locations.length)];
 }
-// Changes the name of the server
-setInterval(() => {
-  locationName.textContent = changeName();
-}, 1000);
-// Adds text to the display
-setInterval(() => {
-  const locations = [
-    "Alfa",
-    "Bravo",
-    "Charlie",
-    "Delta",
-    "Echo",
-    "Foxtrot",
-    "Golf",
-    "Hotel",
-    "India",
-    "Juliett",
-    "Kilo",
-    "Lima",
-    "Mike",
-    "November",
-    "Oscar",
-    "Papa",
-    "Quebec",
-    "Romeo",
-    "Sierra",
-    "Tango",
-    "Uniform",
-    "Victor",
-    "Whiskey",
-    "X-ray",
-    "Yankee",
-    "Zulu",
-  ];
-  const locationNumber = Math.floor(Math.random() * locations.length);
-  display.innerHTML += "<br>> " + locations[locationNumber];
-}, 2000);
+function autoAdder() {
+  // Changes the name of the server
+  setInterval(() => {
+    typeWriterLocation(changeName(), 50);
+  }, 2000);
+  // Adds text to the display
+  setInterval(() => {
+    typeWriter(locations[Math.floor(Math.random() * locations.length)], 50);
+  }, 2000);
+}
+autoAdder();
