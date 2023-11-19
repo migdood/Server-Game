@@ -98,11 +98,10 @@ main > .displayContainer > #display {
   outline: none;
   resize: none;
   cursor: default;
-  word-wrap: normal;
+  word-wrap: break-word;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
-  scrollbar-color: black black;
 }
 .inputContainer {
   grid-area: 9/1/10/7;

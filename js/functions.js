@@ -1,4 +1,4 @@
-export function typeWriter(text, speed) {
+export async function typeWriter(text, speed) {
   let i = 0;
   display.innerHTML += "<br>> ";
   const interval = setInterval(() => {
@@ -10,21 +10,26 @@ export function typeWriter(text, speed) {
     }
   }, speed);
 }
-export function typeWriterPlayer(text, speed) {
+
+export async function typeWriterPlayer(text, speed) {
   let i = 0;
   display.innerHTML += "<br>< ";
-  const interval = setInterval(() => {
-    if (i < text.length) {
-      display.innerHTML += text.charAt(i);
-      i++;
-    } else {
-      clearInterval(interval);
-    }
-  }, speed);
+  return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        display.innerHTML += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(interval);
+        resolve();
+      }
+    }, speed);
+  });
 }
-export function typeWriterLocation(text, speed) {
+
+export async function typeWriterLocation(text, speed) {
   let i = 0;
-  locationName.textContent = "";
+  locationName.innerHTML = "";
   const interval = setInterval(() => {
     if (i < text.length) {
       locationName.innerHTML += text.charAt(i);
@@ -33,4 +38,9 @@ export function typeWriterLocation(text, speed) {
       clearInterval(interval);
     }
   }, speed);
+}
+export async function inputChecker(text) {
+  if (text == "sv.ping") {
+    await typeWriter("lorem you are <strong>gay</strong> ipsum", 30);
+  }
 }

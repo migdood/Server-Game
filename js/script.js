@@ -2,6 +2,7 @@ import {
   typeWriter,
   typeWriterPlayer,
   typeWriterLocation,
+  inputChecker,
 } from "./functions.js";
 
 const locationName = document.getElementById("locationName");
@@ -35,19 +36,20 @@ const locations = [
   "Yankee",
   "Zulu",
 ];
-// let serverHealth = {
-//   health: 100,
-// };
-addEventListener("keypress", (e) => {
+
+addEventListener("keypress", async (e) => {
   if (e.key === "Enter") {
     if (input.value == "") {
       input.value = "";
     } else {
-      typeWriterPlayer(input.value, 0);
+      await typeWriterPlayer(input.value, 0);
+      console.log(input.value);
+      await inputChecker(input.value);
       input.value = "";
     }
   }
 });
+
 function changeName() {
   return locations[Math.floor(Math.random() * locations.length)];
 }
@@ -61,4 +63,12 @@ function autoAdder() {
     typeWriter(locations[Math.floor(Math.random() * locations.length)], 50);
   }, 2000);
 }
-autoAdder();
+// autoAdder();
+switch (input.value) {
+  case "sv.ping":
+    typeWriter("Unknown", 50);
+    break;
+
+  default:
+    break;
+}
