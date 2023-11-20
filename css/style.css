@@ -94,6 +94,7 @@ main > .displayContainer > #display {
   font-size: 30px;
   height: 100%;
   width: 100%;
+  line-height: 35px;
   box-sizing: border-box;
   outline: none;
   resize: none;

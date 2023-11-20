@@ -4,11 +4,17 @@ import {
   typeWriterLocation,
   inputChecker,
 } from "./functions.js";
+import { Server, SERVERLIST } from "./classes&objects.js";
+document.addEventListener("DOMContentLoaded", async () => {
+  await typeWriter("Welcome to Server Keeper.", 30);
+  SERVERLIST["golf"].showServer();
+  input.focus();
+});
 
 const locationName = document.getElementById("locationName");
 const display = document.getElementById("display");
-const input = document.getElementById("displayInput");
-const locations = [
+export const input = document.getElementById("displayInput");
+export const locations = [
   "Alfa",
   "Bravo",
   "Charlie",
@@ -36,20 +42,22 @@ const locations = [
   "Yankee",
   "Zulu",
 ];
-
 addEventListener("keypress", async (e) => {
   if (e.key === "Enter") {
     if (input.value == "") {
       input.value = "";
     } else {
-      await typeWriterPlayer(input.value, 0);
-      console.log(input.value);
-      await inputChecker(input.value);
+      const WriteThis = input.value;
       input.value = "";
+      input.disabled = true;
+      console.log((input.disabled = true));
+      await typeWriterPlayer(WriteThis, 0);
+      await inputChecker(WriteThis);
+      input.disabled = false;
+      input.focus();
     }
   }
 });
-
 function changeName() {
   return locations[Math.floor(Math.random() * locations.length)];
 }
@@ -59,16 +67,8 @@ function autoAdder() {
     typeWriterLocation(changeName(), 50);
   }, 2000);
   // Adds text to the display
-  setInterval(() => {
-    typeWriter(locations[Math.floor(Math.random() * locations.length)], 50);
-  }, 2000);
+  // setInterval(() => {
+  //   typeWriter(locations[Math.floor(Math.random() * locations.length)], 50);
+  // }, 2000);
 }
-// autoAdder();
-switch (input.value) {
-  case "sv.ping":
-    typeWriter("Unknown", 50);
-    break;
-
-  default:
-    break;
-}
+autoAdder();
