@@ -87,7 +87,7 @@ main > .displayContainer {
   width: 100%;
 }
 main > .displayContainer > #display {
-  padding: 0 20px 0 20px;
+  padding: 0 20px 5px 20px;
   border: 1px solid white;
   background-color: transparent;
   color: white;

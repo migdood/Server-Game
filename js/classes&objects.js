@@ -20,12 +20,13 @@ export class Server {
     this.status = newstatus;
   }
 }
-export const SERVERLIST = [];
+
 document.addEventListener("DOMContentLoaded", () => {
   locations.forEach(async (location) => {
     SERVERLIST[location.toLowerCase()] = new Server(location, 100, "running");
   });
 });
+export const SERVERLIST = [];
 
 // const Alfa = new Server('Alfa', 100, 'running');
 // const Bravo = new Server('Bravo', 11, 'running');
