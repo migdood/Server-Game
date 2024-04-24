@@ -1,11 +1,26 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  input.disabled = true;
   await typeWriter(
     "Welcome to Server Keeper\nInspired by the server maintenance in `Voices of the Void` by mrdrnose\nYour objective is to:\n1- Keep the servers running\n2- Perform maintenance on breaking servers\n3- Get a high-score.",
-    30
+    1
   );
+  input.disabled = false;
+
+  locations.map(async (location) => {
+    SERVERLIST[location.toLowerCase()] = new Server(
+      location,
+      20 + Math.floor(Math.random() * 5),
+      "running"
+    );
+  });
+
+  BreakServers();
+
   input.focus();
+  autoConsoleNameChanger();
 });
 
+const SERVERLIST = {};
 const locationName = document.getElementById("locationName");
 const display = document.getElementById("display");
 const input = document.getElementById("displayInput");
@@ -37,6 +52,7 @@ const locations = [
   "Yankee",
   "Zulu",
 ];
+
 addEventListener("keypress", async (e) => {
   if (e.key === "Enter") {
     if (input.value == "") {
@@ -46,91 +62,91 @@ addEventListener("keypress", async (e) => {
       input.value = "";
       input.disabled = true;
       console.log((input.disabled = true));
+      display.scrollTop = display.scrollHeight;
       await typeWriterPlayer(WriteThis, 0);
       await inputChecker(WriteThis);
       input.disabled = false;
       input.focus();
+      display.scroll;
     }
   }
 });
+
 function changeName() {
   return locations[Math.floor(Math.random() * locations.length)];
 }
-function autoAdder() {
-  // Changes the name of the server
+
+function autoConsoleNameChanger() {
+  // Changes the name of the server in the top right
   setInterval(() => {
     typeWriterLocation(changeName(), 50);
   }, 2000);
-  // Adds text to the display
-  // setInterval(() => {
-  //   typeWriter(locations[Math.floor(Math.random() * locations.length)], 50);
-  // }, 2000);
 }
-autoAdder();
+
+function BreakServers() {
+  setInterval(() => {
+    const Damage = 15;
+    const DamagePerTick = Math.floor(Math.random() * Damage);
+
+    const SelectedLocation =
+      locations[Math.floor(Math.random() * locations.length)].toLowerCase();
+
+    let Server = SERVERLIST[SelectedLocation];
+
+    if (Server.maintenance >= 1 && Server.status !== "upkeep") {
+      Server.maintenance -= DamagePerTick;
+      if (Server.maintenance <= 0) {
+        Server.maintenance = 0;
+      }
+      ShowLowServers(Server);
+    } else {
+      Server.maintenance = 0;
+    }
+  }, 500);
+}
+
+async function ShowLowServers(server) {
+  const aside = document.getElementById("tutorial");
+  const p = document.createElement("p");
+  const hr = document.createElement("hr");
+  const lowMaintenanceServers = [];
+
+  // Check if the server already exists in lowMaintenanceServers
+  //TODO: Create 26 letters in the aside html and a big dot next to it, it will change color (green, red) when it's bellow 30
+  // This will eliminate the headache of updating html elements which are created through JS 
+  
+  // console.log(lowMaintenanceServers);
+}
 
 class Server {
-  constructor(name, calibration, status) {
+  constructor(name, maintenance, status) {
     this.name = name;
-    this.calibration = calibration;
+    this.maintenance = maintenance;
     this.status = status;
   }
   async showServer() {
     await typeWriter(
-      `${this.name} | calibration: ${this.calibration} | status: ${this.status}`,
+      `${this.name} | maintenance: ${this.maintenance} | status: ${this.status}`,
       30
     );
     input.focus();
   }
-  calibrate(newcalibration) {
-    this.calibration = newcalibration;
+  maintain(newMaintenance) {
+    this.calibration = newMaintenance;
   }
   statusUpdate(newstatus) {
     this.status = newstatus;
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  locations.forEach(async (location) => {
-    SERVERLIST[location.toLowerCase()] = new Server(location, 100, "running");
-  });
-});
-const SERVERLIST = [];
-
-// const Alfa = new Server('Alfa', 100, 'running');
-// const Bravo = new Server('Bravo', 11, 'running');
-// const Charlie = new Server('Charlie', 100, 'running');
-// const Delta = new Server('Delta', 99, 'running');
-// const Echo = new Server('Echo', 99, 'running');
-// const Foxtrot = new Server('Foxtrot', 58, 'running');
-// const Golf = new Server('Golf', 22, 'running');
-// const Hotel = new Server('Hotel', 52, 'running');
-// const India = new Server('India', 100, 'running');
-// const Juliett = new Server('Juliett', 76, 'running');
-// const Kilo = new Server('Kilo', 54, 'running');
-// const Lima = new Server('Lima', 86, 'running');
-// const Mike = new Server('Mike', 20, 'running');
-// const November = new Server('November', 95, 'running');
-// const Oscar = new Server('Oscar', 100, 'running');
-// const Papa = new Server('Papa', 100, 'running');
-// const Quebec = new Server('Quebec', 100, 'running');
-// const Romeo = new Server('Romeo', 100, 'running');
-// const Sierra = new Server('Sierra', 100, 'running');
-// const Tango = new Server('Tango', 100, 'running');
-// const Uniform = new Server('Uniform', 100, 'running');
-// const Victor = new Server('Victor', 100, 'running');
-// const Whiskey = new Server('Whiskey', 100, 'running');
-// const Xray = new Server('X-ray', 100, 'running');
-// const Yankee = new Server('Yankee', 100, 'running');
-// const Zulu = new Server('Zulu', 100, 'running');
-
 async function typeWriter(text, speed) {
   let i = 0;
-  display.innerHTML += "<br>"; // Ensure a line break before typing starts
+  display.innerHTML += "<br>";
   return new Promise((resolve) => {
     const interval = setInterval(() => {
       if (i < text.length) {
         if (text[i] === "\n") {
-          display.innerHTML += "<br>"; // Insert line break if '\n' is encountered
+          display.innerHTML += "<br>";
         } else {
           display.innerHTML += text.charAt(i);
         }
@@ -145,7 +161,7 @@ async function typeWriter(text, speed) {
 
 async function typeWriterPlayer(text, speed) {
   let i = 0;
-  display.innerHTML += "<br>< ";
+  display.innerHTML += "<br>> ";
   return new Promise((resolve) => {
     const interval = setInterval(() => {
       if (i < text.length) {
@@ -188,7 +204,7 @@ async function inputChecker(text) {
         break;
 
       default:
-        typeWriter("suck dick", ResponseSpeed);
+        typeWriter("Could not process your request.", ResponseSpeed);
         break;
     }
   } else {
@@ -206,6 +222,7 @@ async function inputChecker(text) {
         }, 300);
         break;
 
+      case "greet me":
       case "welcome me":
         await typeWriter(":( sorry sir...", 30);
         await typeWriter("Welcome to Server Keeper.", 30);
