@@ -1,7 +1,10 @@
+const Global_Repeat_Response_Speed = 10;
+const Global_Console_Response_Speed = 5;
+
 document.addEventListener("DOMContentLoaded", async () => {
   input.disabled = true;
   await typeWriter(
-    "Welcome to Server Keeper\nInspired by the server maintenance in `Voices of the Void` by mrdrnose\nYour objective is to:\n1- Keep the servers running\n2- Perform maintenance on breaking servers\n3- Get a high-score.",
+    "Welcome to Server Keeper\nInspired by the server maintenance in `Voices of the Void` by mrdrnose\nmrdrnose.itch.io/votv\nYour objective is to:\n1- Keep the servers running\n2- Perform maintenance on breaking servers\n3- Get a high-score.",
     1
   );
   input.disabled = false;
@@ -9,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   locations.map(async (location) => {
     SERVERLIST[location.toLowerCase()] = new Server(
       location,
-      20 + Math.floor(Math.random() * 5),
+      70 + Math.floor(Math.random() * 5),
       "running"
     );
   });
@@ -61,7 +64,6 @@ addEventListener("keypress", async (e) => {
       const WriteThis = input.value;
       input.value = "";
       input.disabled = true;
-      console.log((input.disabled = true));
       display.scrollTop = display.scrollHeight;
       await typeWriterPlayer(WriteThis, 0);
       await inputChecker(WriteThis);
@@ -85,7 +87,7 @@ function autoConsoleNameChanger() {
 
 function BreakServers() {
   setInterval(() => {
-    const Damage = 15;
+    const Damage = 5;
     const DamagePerTick = Math.floor(Math.random() * Damage);
 
     const SelectedLocation =
@@ -95,9 +97,8 @@ function BreakServers() {
 
     if (Server.maintenance >= 1 && Server.status !== "upkeep") {
       Server.maintenance -= DamagePerTick;
-      if (Server.maintenance <= 0) {
-        Server.maintenance = 0;
-      }
+      if (Server.maintenance <= 0) Server.maintenance = 0;
+
       ShowLowServers(Server);
     } else {
       Server.maintenance = 0;
@@ -113,8 +114,8 @@ async function ShowLowServers(server) {
 
   // Check if the server already exists in lowMaintenanceServers
   //TODO: Create 26 letters in the aside html and a big dot next to it, it will change color (green, red) when it's bellow 30
-  // This will eliminate the headache of updating html elements which are created through JS 
-  
+  // This will eliminate the headache of updating html elements which are created through JS
+
   // console.log(lowMaintenanceServers);
 }
 
@@ -127,15 +128,15 @@ class Server {
   async showServer() {
     await typeWriter(
       `${this.name} | maintenance: ${this.maintenance} | status: ${this.status}`,
-      30
+      Global_Repeat_Response_Speed
     );
     input.focus();
   }
   maintain(newMaintenance) {
-    this.calibration = newMaintenance;
+    this.maintenance = newMaintenance;
   }
-  statusUpdate(newstatus) {
-    this.status = newstatus;
+  statusUpdate(newStatus) {
+    this.status = newStatus;
   }
 }
 
@@ -189,59 +190,90 @@ async function typeWriterLocation(text, speed) {
 }
 
 async function inputChecker(text) {
-  const ResponseSpeed = 20;
-  const command = text.trim().split(" ");
+  const command = text.toLowerCase().trim().split(" ");
+  let singleCommand = "";
+
+  if (command.length == 1) {
+    singleCommand = command.toString();
+  } else {
+    singleCommand = null;
+  }
+
+  // Display 1 server
   if (command.length >= 2 && command[0] == "sv.ping") {
     const serverName = command.slice(1).join(" ");
 
-    switch (serverName) {
-      case serverName:
-        try {
-          SERVERLIST[serverName].showServer();
-        } catch (error) {
-          typeWriter("Such a server doesn't exist", ResponseSpeed);
-        }
-        break;
-
-      default:
-        typeWriter("Could not process your request.", ResponseSpeed);
-        break;
-    }
-  } else {
-    switch (text.toLowerCase()) {
-      case "sv.ping":
-        for (const location of locations) {
-          await SERVERLIST[location.toLowerCase()].showServer();
-        }
-        break;
-
-      case "clear":
-        await typeWriter("clearing...", 100);
-        await setTimeout(() => {
-          display.innerHTML = "";
-        }, 300);
-        break;
-
-      case "greet me":
-      case "welcome me":
-        await typeWriter(":( sorry sir...", 30);
-        await typeWriter("Welcome to Server Keeper.", 30);
-        break;
-
-      case "inspiration":
-      case "inspo":
-      case "credit":
-      case "credits":
-        await typeWriter("Migdood on github: github.com/migdood", 30);
-        await typeWriter(
-          "Inspired by Voices of the Void: mrdrnose.itch.io/votv",
-          30
+    if (SERVERLIST[serverName]) {
+      try {
+        SERVERLIST[serverName].showServer();
+      } catch (error) {
+        typeWriter(
+          "Such a server doesn't exist",
+          Global_Console_Response_Speed
         );
-        break;
-
-      default:
-        await typeWriter("Command unknown :(", ResponseSpeed);
-        break;
+      }
+    } else {
+      await typeWriter("Server not found", Global_Console_Response_Speed);
     }
+  }
+
+  // Repair
+  if (command.length >= 2 && command[0] == "repair") {
+    const serverName = command.slice(1).join(" ");
+
+    if (SERVERLIST[serverName]) {
+      try {
+        await typeWriter(
+          `Repairing ${serverName}`,
+          Global_Console_Response_Speed
+        );
+        SERVERLIST[serverName].maintain(100);
+        await SERVERLIST[serverName].showServer();
+      } catch (error) {
+        await typeWriter(
+          "Could not process your request.",
+          Global_Console_Response_Speed
+        );
+      }
+    } else {
+      await typeWriter("Server not found", Global_Console_Response_Speed);
+    }
+  }
+
+  switch (singleCommand) {
+    case "sv.ping":
+      for (const location of locations) {
+        await SERVERLIST[location.toLowerCase()].showServer();
+      }
+      break;
+
+    case "clear":
+      await typeWriter("clearing...", 100);
+      await setTimeout(() => {
+        display.innerHTML = "";
+      }, 300);
+      break;
+
+    case "greet me":
+    case "welcome me":
+      await typeWriter(":( sorry sir...", 30);
+      await typeWriter("Welcome to Server Keeper.", 30);
+      break;
+
+    case "inspiration":
+    case "inspo":
+    case "credit":
+    case "credits":
+      await typeWriter("Migdood on github: github.com/migdood", 30);
+      await typeWriter(
+        "Inspired by Voices of the Void: mrdrnose.itch.io/votv",
+        30
+      );
+      break;
+    case null:
+      break;
+    default:
+      await typeWriter("Command unknown :(", Global_Console_Response_Speed);
+      break;
   }
 }
