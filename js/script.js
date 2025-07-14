@@ -1,6 +1,11 @@
 const Global_Repeat_Response_Speed = 10;
 const Global_Console_Response_Speed = 5;
-
+// TODO: 
+// Add Electrical Transformers which die much slower but need a reboot to fix and take a few seconds
+// Add a small math puzzle to each server when repairing. 
+// Add colors to the console.
+// Add a way to cancel the display of all servers because it's taking too long.
+// Add a way to see critically low servers on the side or something.
 document.addEventListener("DOMContentLoaded", async () => {
   input.disabled = true;
   await typeWriter(
@@ -264,7 +269,7 @@ async function inputChecker(text) {
     case "inspo":
     case "credit":
     case "credits":
-      await typeWriter("Migdood on github: github.com/migdood", 30);
+      await typeWriter("Made by Migdood on github: github.com/migdood", 30);
       await typeWriter(
         "Inspired by Voices of the Void: mrdrnose.itch.io/votv",
         30
