@@ -1,11 +1,11 @@
-const Global_Repeat_Response_Speed = 10;
-const Global_Console_Response_Speed = 5;
-// TODO: 
-// Add Electrical Transformers which die much slower but need a reboot to fix and take a few seconds
-// Add a small math puzzle to each server when repairing. 
-// Add colors to the console.
-// Add a way to cancel the display of all servers because it's taking too long.
-// Add a way to see critically low servers on the side or something.
+import {
+  typeWriter,
+  typeWriterPlayer,
+  Server,
+  Global_Console_Response_Speed,
+  Global_Repeat_Response_Speed,
+} from "./core func.js";
+
 document.addEventListener("DOMContentLoaded", async () => {
   input.disabled = true;
   await typeWriter(
@@ -14,13 +14,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   input.disabled = false;
 
+  // Creates the serverlist
   locations.map(async (location) => {
     SERVERLIST[location.toLowerCase()] = new Server(
       location,
       70 + Math.floor(Math.random() * 5),
-      "running"
+      "online"
     );
   });
+
+  // Object.keys(SERVERLIST).forEach((element) => {
+  //   const server = SERVERLIST[element];
+  //   console.log(
+  //     `Object name: ${element} | maintenance level: ${server.maintenance}`
+  //   );
+  // });
 
   BreakServers();
 
@@ -29,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const SERVERLIST = {};
+let BrokenServersList = {};
 const locationName = document.getElementById("locationName");
 const display = document.getElementById("display");
 const input = document.getElementById("displayInput");
@@ -79,15 +88,16 @@ addEventListener("keypress", async (e) => {
   }
 });
 
-function changeName() {
-  return locations[Math.floor(Math.random() * locations.length)];
-}
-
+/**
+ * Changes the server name randomly in the top right.
+ */
 function autoConsoleNameChanger() {
-  // Changes the name of the server in the top right
   setInterval(() => {
     typeWriterLocation(changeName(), 50);
   }, 2000);
+}
+function changeName() {
+  return locations[Math.floor(Math.random() * locations.length)];
 }
 
 function BreakServers() {
@@ -100,13 +110,23 @@ function BreakServers() {
 
     let Server = SERVERLIST[SelectedLocation];
 
-    if (Server.maintenance >= 1 && Server.status !== "upkeep") {
+    if (Server.maintenance >= 1 && Server.status !== "offline") {
       Server.maintenance -= DamagePerTick;
-      if (Server.maintenance <= 0) Server.maintenance = 0;
+      if (Server.maintenance <= 0) {
+        Server.maintenance = 0;
+        Server.status = "offline";
+        BrokenServersList += Server;
+        SERVERLIST -= Server;
+        console.log(
+          `Server ${Server.name} is now offline due to maintenance reaching 0.`
+        );
+        console.log(`List of all offline servers: ${BrokenServersList}`);
+      }
 
       ShowLowServers(Server);
     } else {
       Server.maintenance = 0;
+      Server.status = "offline";
     }
   }, 500);
 }
@@ -122,63 +142,6 @@ async function ShowLowServers(server) {
   // This will eliminate the headache of updating html elements which are created through JS
 
   // console.log(lowMaintenanceServers);
-}
-
-class Server {
-  constructor(name, maintenance, status) {
-    this.name = name;
-    this.maintenance = maintenance;
-    this.status = status;
-  }
-  async showServer() {
-    await typeWriter(
-      `${this.name} | maintenance: ${this.maintenance} | status: ${this.status}`,
-      Global_Repeat_Response_Speed
-    );
-    input.focus();
-  }
-  maintain(newMaintenance) {
-    this.maintenance = newMaintenance;
-  }
-  statusUpdate(newStatus) {
-    this.status = newStatus;
-  }
-}
-
-async function typeWriter(text, speed) {
-  let i = 0;
-  display.innerHTML += "<br>";
-  return new Promise((resolve) => {
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        if (text[i] === "\n") {
-          display.innerHTML += "<br>";
-        } else {
-          display.innerHTML += text.charAt(i);
-        }
-        i++;
-      } else {
-        clearInterval(interval);
-        resolve();
-      }
-    }, speed);
-  });
-}
-
-async function typeWriterPlayer(text, speed) {
-  let i = 0;
-  display.innerHTML += "<br>> ";
-  return new Promise((resolve) => {
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        display.innerHTML += text.charAt(i);
-        i++;
-      } else {
-        clearInterval(interval);
-        resolve();
-      }
-    }, speed);
-  });
 }
 
 async function typeWriterLocation(text, speed) {
@@ -209,14 +172,7 @@ async function inputChecker(text) {
     const serverName = command.slice(1).join(" ");
 
     if (SERVERLIST[serverName]) {
-      try {
-        SERVERLIST[serverName].showServer();
-      } catch (error) {
-        typeWriter(
-          "Such a server doesn't exist",
-          Global_Console_Response_Speed
-        );
-      }
+      SERVERLIST[serverName].showServer();
     } else {
       await typeWriter("Server not found", Global_Console_Response_Speed);
     }
@@ -227,19 +183,15 @@ async function inputChecker(text) {
     const serverName = command.slice(1).join(" ");
 
     if (SERVERLIST[serverName]) {
-      try {
-        await typeWriter(
-          `Repairing ${serverName}`,
-          Global_Console_Response_Speed
-        );
-        SERVERLIST[serverName].maintain(100);
-        await SERVERLIST[serverName].showServer();
-      } catch (error) {
-        await typeWriter(
-          "Could not process your request.",
-          Global_Console_Response_Speed
-        );
-      }
+      await typeWriter(
+        `Repairing ${serverName}`,
+        Global_Console_Response_Speed
+      );
+      SERVERLIST[serverName].maintain(100);
+      SERVERLIST[serverName].status("running");
+      await SERVERLIST[serverName].showServer();
+      BrokenServersList -= serverName;
+      SERVERLIST += serverName;
     } else {
       await typeWriter("Server not found", Global_Console_Response_Speed);
     }
@@ -254,15 +206,9 @@ async function inputChecker(text) {
 
     case "clear":
       await typeWriter("clearing...", 100);
-      await setTimeout(() => {
+      setTimeout(() => {
         display.innerHTML = "";
       }, 300);
-      break;
-
-    case "greet me":
-    case "welcome me":
-      await typeWriter(":( sorry sir...", 30);
-      await typeWriter("Welcome to Server Keeper.", 30);
       break;
 
     case "inspiration":
@@ -271,12 +217,13 @@ async function inputChecker(text) {
     case "credits":
       await typeWriter("Made by Migdood on github: github.com/migdood", 30);
       await typeWriter(
-        "Inspired by Voices of the Void: mrdrnose.itch.io/votv",
+        "Inspired by Voices of the <span style='font-color:purple'> Void: mrdrnose.itch.io/votv</span>",
         30
       );
       break;
     case null:
       break;
+
     default:
       await typeWriter("Command unknown :(", Global_Console_Response_Speed);
       break;
