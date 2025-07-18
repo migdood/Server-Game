@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   locations.map(async (location) => {
     SERVERLIST[location.toLowerCase()] = new Server(
       location,
-      70 + Math.floor(Math.random() * 5),
+      20 + Math.floor(Math.random() * 5),
       "online"
     );
   });
@@ -37,7 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const SERVERLIST = {};
-let BrokenServersList = {};
+const OnlineServersList = {};
+const OfflineServersList = {};
 const locationName = document.getElementById("locationName");
 const display = document.getElementById("display");
 const input = document.getElementById("displayInput");
@@ -100,6 +101,19 @@ function changeName() {
   return locations[Math.floor(Math.random() * locations.length)];
 }
 
+function MoveToOnlineServersList() {
+  Object.keys(SERVERLIST).forEach((serverKey) => {
+    const Server = SERVERLIST[serverKey];
+    if (
+      Server &&
+      Server.maintenance != "offline" &&
+      !OnlineServersList[Server.name]
+    ) {
+      OnlineServersList[Server.name] = Server;
+    }
+  });
+}
+
 function BreakServers() {
   setInterval(() => {
     const Damage = 5;
@@ -108,19 +122,18 @@ function BreakServers() {
     const SelectedLocation =
       locations[Math.floor(Math.random() * locations.length)].toLowerCase();
 
-    let Server = SERVERLIST[SelectedLocation];
+    const Server = OnlineServersList[SelectedLocation];
 
     if (Server.maintenance >= 1 && Server.status !== "offline") {
       Server.maintenance -= DamagePerTick;
       if (Server.maintenance <= 0) {
         Server.maintenance = 0;
         Server.status = "offline";
-        BrokenServersList += Server;
-        SERVERLIST -= Server;
+        MoveToOnlineServersList();
+        console.log(`Server ${Server.name} is now offline.`);
         console.log(
-          `Server ${Server.name} is now offline due to maintenance reaching 0.`
+          `List of all offline servers: ${Object.keys(BrokenServersList)}`
         );
-        console.log(`List of all offline servers: ${BrokenServersList}`);
       }
 
       ShowLowServers(Server);
@@ -178,23 +191,36 @@ async function inputChecker(text) {
     }
   }
 
+  async function RepairServer(serverName) {
+    const Server = SERVERLIST[serverName];
+
+    if (!Server) {
+      await typeWriter(
+        "This server doesn't exist.",
+        Global_Console_Response_Speed
+      );
+      return;
+    }
+
+    if (OfflineServersList[serverName]) {
+      await typeWriter(
+        `Repairing ${serverName}...`,
+        Global_Console_Response_Speed
+      );
+      Server.maintenance(100);
+      Server.status("online");
+
+      await SERVERLIST[serverName].showServer();
+      delete OfflineServersList[serverName];
+      OnlineServersList[serverName] = Server;
+    } else {
+      await typeWriter("Server is not offline.", Global_Console_Response_Speed);
+    }
+  }
   // Repair
   if (command.length >= 2 && command[0] == "repair") {
     const serverName = command.slice(1).join(" ");
-
-    if (SERVERLIST[serverName]) {
-      await typeWriter(
-        `Repairing ${serverName}`,
-        Global_Console_Response_Speed
-      );
-      SERVERLIST[serverName].maintain(100);
-      SERVERLIST[serverName].status("running");
-      await SERVERLIST[serverName].showServer();
-      BrokenServersList -= serverName;
-      SERVERLIST += serverName;
-    } else {
-      await typeWriter("Server not found", Global_Console_Response_Speed);
-    }
+    RepairServer(serverName);
   }
 
   switch (singleCommand) {
