@@ -52,10 +52,10 @@ export class Server {
     );
     input.focus();
   }
-  maintain(newMaintenance) {
+  SetMaintenance(newMaintenance) {
     this.maintenance = newMaintenance;
   }
-  statusUpdate(newStatus) {
+  SetStatus(newStatus) {
     this.status = newStatus;
   }
 }

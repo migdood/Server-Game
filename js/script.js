@@ -13,27 +13,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     1
   );
   input.disabled = false;
+  autoConsoleNameChanger();
 
   // Creates the serverlist
   locations.map(async (location) => {
     SERVERLIST[location.toLowerCase()] = new Server(
       location,
-      20 + Math.floor(Math.random() * 5),
+      10 + Math.floor(Math.random() * 5),
       "online"
     );
   });
 
-  // Object.keys(SERVERLIST).forEach((element) => {
-  //   const server = SERVERLIST[element];
-  //   console.log(
-  //     `Object name: ${element} | maintenance level: ${server.maintenance}`
-  //   );
-  // });
-
+  MoveToOnlineServersList();
   BreakServers();
 
   input.focus();
-  autoConsoleNameChanger();
 });
 
 const SERVERLIST = {};
@@ -109,7 +103,7 @@ function MoveToOnlineServersList() {
       Server.maintenance != "offline" &&
       !OnlineServersList[Server.name]
     ) {
-      OnlineServersList[Server.name] = Server;
+      OnlineServersList[Server.name.toLowerCase()] = Server;
     }
   });
 }
@@ -122,17 +116,19 @@ function BreakServers() {
     const SelectedLocation =
       locations[Math.floor(Math.random() * locations.length)].toLowerCase();
 
-    const Server = OnlineServersList[SelectedLocation];
-
+    let Server = OnlineServersList[SelectedLocation];
     if (Server.maintenance >= 1 && Server.status !== "offline") {
       Server.maintenance -= DamagePerTick;
       if (Server.maintenance <= 0) {
-        Server.maintenance = 0;
-        Server.status = "offline";
-        MoveToOnlineServersList();
+        Server.SetMaintenance(0);
+        Server.SetStatus("offline");
+
+        OfflineServersList[Server.name.toLowerCase()] = Server;
+        delete OnlineServersList[Server.name];
+
         console.log(`Server ${Server.name} is now offline.`);
         console.log(
-          `List of all offline servers: ${Object.keys(BrokenServersList)}`
+          `List of all offline servers: ${Object.keys(OfflineServersList)}`
         );
       }
 
@@ -192,7 +188,7 @@ async function inputChecker(text) {
   }
 
   async function RepairServer(serverName) {
-    const Server = SERVERLIST[serverName];
+    let Server = SERVERLIST[serverName];
 
     if (!Server) {
       await typeWriter(
@@ -202,25 +198,28 @@ async function inputChecker(text) {
       return;
     }
 
-    if (OfflineServersList[serverName]) {
+    if (OfflineServersList[serverName.toLowerCase()]) {
       await typeWriter(
         `Repairing ${serverName}...`,
         Global_Console_Response_Speed
       );
-      Server.maintenance(100);
-      Server.status("online");
+      Server.SetMaintenance(100);
+      Server.SetStatus("online");
 
       await SERVERLIST[serverName].showServer();
       delete OfflineServersList[serverName];
       OnlineServersList[serverName] = Server;
     } else {
-      await typeWriter("Server is not offline.", Global_Console_Response_Speed);
+      await typeWriter(
+        `Server ${serverName} is not offline.`,
+        Global_Console_Response_Speed
+      );
     }
   }
   // Repair
   if (command.length >= 2 && command[0] == "repair") {
-    const serverName = command.slice(1).join(" ");
-    RepairServer(serverName);
+    const serverName = command[1];
+    await RepairServer(serverName);
   }
 
   switch (singleCommand) {
